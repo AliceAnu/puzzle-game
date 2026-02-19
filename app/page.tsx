@@ -1,13 +1,13 @@
 "use client";
 
 import { auth } from "@/lib/firebase";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 
 export default function HomePage() {
   // Google Login
   const loginGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    await signInWithRedirect(auth, provider);
 
     // Redirect to Game after login
     window.location.href = "/game";
