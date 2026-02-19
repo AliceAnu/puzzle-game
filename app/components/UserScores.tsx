@@ -25,8 +25,8 @@ export default function UserScores() {
   useEffect(() => {
     async function fetchScores() {
       try {
-        // ✅ FIX: Stop if user not ready
-        if (!user) return;
+        // ✅ FIX: Stop if user not ready OR email missing
+        if (!user?.email) return;
 
         const res = await fetch(`/api/scores?email=${user.email}`);
 
@@ -48,8 +48,10 @@ export default function UserScores() {
     <div>
       <h2>User Scores</h2>
 
+      {/* No Scores Yet */}
       {scores.length === 0 && <p>No scores yet.</p>}
 
+      {/* Display Scores */}
       {scores.map((s) => (
         <p key={s.id}>
           {s.date} → ⭐ {s.score}
