@@ -1,23 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
 
 export default function UserScores() {
-  const { user, loading } = useAuth();
-
+  const [user, setUser] = useState<User | null>(null);
   const [scores, setScores] = useState<any[]>([]);
-  const [error, setError] = useState("");
 
+  /* -----------------------------
+     ✅ Detect Logged-in User
+  ----------------------------- */
   useEffect(() => {
-    // ✅ Wait until auth finishes loading
-    if (loading) return;
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
 
-    // ✅ If user is not logged in, stop
-    if (!user?.email) return;
+    return () => unsub();
+  }, []);
 
+  /* -----------------------------
+     ✅ Fetch Scores Safely
+  ----------------------------- */
+  useEffect(() => {
     async function fetchScores() {
       try {
+        // ✅ FIX: Stop if user not ready
+        if (!user) return;
+
         const res = await fetch(`/api/scores?email=${user.email}`);
 
         if (!res.ok) {
@@ -27,46 +37,24 @@ export default function UserScores() {
         const data = await res.json();
         setScores(data);
       } catch (err) {
-        console.error(err);
-        setError("Could not load scores");
+        console.error("Error fetching scores:", err);
       }
     }
 
     fetchScores();
-  }, [user, loading]);
-
-  // ✅ Loading state
-  if (loading) {
-    return <p>Loading user...</p>;
-  }
-
-  // ✅ Guest user state
-  if (!user) {
-    return <p>Please login to see your scores.</p>;
-  }
+  }, [user]);
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-3">
-        Welcome, {user.displayName || user.email}
-      </h2>
+      <h2>User Scores</h2>
 
-      <h3 className="text-lg font-semibold">Your Daily Scores</h3>
+      {scores.length === 0 && <p>No scores yet.</p>}
 
-      {error && <p className="text-red-500">{error}</p>}
-
-      {scores.length === 0 ? (
-        <p>No scores found yet.</p>
-      ) : (
-        <ul className="mt-3 space-y-2">
-          {scores.map((score) => (
-            <li key={score.id} className="border p-2 rounded">
-              📅 {score.date} | ⭐ Score: {score.score} | ⏱ Time:{" "}
-              {score.timeTaken}s
-            </li>
-          ))}
-        </ul>
-      )}
+      {scores.map((s) => (
+        <p key={s.id}>
+          {s.date} → ⭐ {s.score}
+        </p>
+      ))}
     </div>
   );
 }
