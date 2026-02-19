@@ -4,28 +4,24 @@ import { auth } from "@/lib/firebase";
 import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 
 export default function HomePage() {
-  // Google Login
+  // ✅ Google Login Redirect
   const loginGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithRedirect(auth, provider);
 
-    // Redirect to Game after login
-    window.location.href = "/game";
+    // ✅ Only redirect to Google
+    await signInWithRedirect(auth, provider);
   };
 
   // Guest Login
   const loginGuest = () => {
     localStorage.setItem("guest", "true");
-
-    // Guest also goes to Game
     window.location.href = "/game";
   };
 
-  // ✅ Admin Password Prompt
+  // Admin Password Prompt
   const adminLogin = () => {
     const password = prompt("Enter Admin Password 🔒");
 
-    // ✅ Set your admin password here
     if (password === "alice@26") {
       window.location.href = "/admin";
     } else {
@@ -35,13 +31,11 @@ export default function HomePage() {
 
   return (
     <div className="page-center login-bg">
-      
-      {/* ✅ Admin Button Top Right */}
+      {/* ✅ Admin Button */}
       <button className="admin-btn" onClick={adminLogin}>
         🔒 Admin Login
       </button>
 
-      {/* Main Jumbotron */}
       <div className="jumbotron">
         <h1 className="brand-title">Bluestock Puzzle Game</h1>
 
